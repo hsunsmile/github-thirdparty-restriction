@@ -20,6 +20,7 @@ build/
 /_yardoc/
 /doc/
 /rdoc/
+/cache
 
 ## Environment normalization:
 /.bundle/
