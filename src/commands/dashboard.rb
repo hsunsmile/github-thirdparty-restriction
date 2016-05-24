@@ -8,8 +8,9 @@ class Dashboard < Sinatra::Base
   enable :sessions
 
   set :root, File.expand_path('../../', File.dirname(__FILE__))
-  set :views, Proc.new { File.join(root, 'src', 'views') }
-  set :public_folder, Proc.new{ File.join(root, '/public') }
+  set :views, Proc.new{ File.join(root, 'src', 'assets') }
+  set :public_folder, Proc.new{ File.join(root, 'public') }
+  set :scss, {:style => :compact, :debug_info => false}
 
   set :github_options, {
     :scopes    => 'write:public_key,admin:repo_hook,repo',
@@ -98,7 +99,7 @@ class Dashboard < Sinatra::Base
 
   get '/logout' do
     logout!
-    redirect '/unauthenticated'
+    redirect '/401.html'
   end
 end
 
