@@ -23,7 +23,8 @@ var jsFiles = {
     config.bowerDir + '/react/react.js',
     config.bowerDir + '/react/react-dom.js',
     config.bowerDir + '/bootstrap/dist/js/bootstrap.js',
-    config.bowerDir + '/lodash/dist/lodash.js'
+    config.bowerDir + '/lodash/dist/lodash.js',
+    config.bowerDir + '/tablesorter/dist/js/jquery.tablesorter.js'
   ],
   source: [
     config.componentPath + '/**/*.jsx'
@@ -33,7 +34,8 @@ var jsFiles = {
 var cssFiles = {
   vendor: [
     config.bowerDir + '/bootstrap/dist/css/bootstrap.min.css',
-    config.bowerDir + '/bootstrap-social/bootstrap-social.css'
+    config.bowerDir + '/bootstrap-social/bootstrap-social.css',
+    config.bowerDir + '/tablesorter/dist/css/theme.bootstrap.min.css'
   ],
   source: [
     config.sassPath + '/**/*.scss'

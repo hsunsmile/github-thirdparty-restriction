@@ -2,6 +2,7 @@ require 'sinatra/base'
 require 'sinatra/reloader'
 require 'sinatra_auth_github'
 require 'rack'
+require 'time'
 require 'json'
 
 class Dashboard < Sinatra::Base
@@ -53,11 +54,17 @@ class Dashboard < Sinatra::Base
     end
 
     def deploy_keys(organization)
-      repos(organization).each do |repo|
-        cache_key = "deploy_key:#{repo['name']}"
-        cache(cache_key) do
-          github_user.api.deploy_keys(repo['id']).map(&:to_h)
+      repos(organization).map do |repo|
+        cache_key = "deploy_key:#{repo[:id]}"
+        keys = cache(cache_key) do
+          github_user.api.deploy_keys(repo[:id]) rescue []
         end
+        repo[:deploy_keys] = keys.select do |key|
+          key['created_at'] && DateTime.parse(key['created_at']) <= DateTime.parse("2014-02-01 00:00:00 UTC")
+        end
+        repo
+      end.select do |repo|
+        !repo[:deploy_keys].empty?
       end
     end
 
@@ -66,20 +73,48 @@ class Dashboard < Sinatra::Base
     end
 
     def user
+      keys = github_user.api.keys
       github_user.attribs.to_h.merge(
-        keys: github_user.api.keys.map(&:to_h)
+        keys_count: keys.count,
+        invalid_keys_count: keys.select do |key|
+          key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC")
+        end.count,
+        keys: keys.map(&:to_h)
       )
     end
   end
 
-  get '/' do
+  before do
+    p = request.path_info.split('/')[1]
+    pass if p =~ /\.html$|auth.*/
+    unless authenticated?
+      redirect '/401.html'
+    end
+  end
+
+  get '/authenticate' do
     authenticate!
+    redirect '/index.html'
+  end
+
+  get '/' do
     redirect '/index.html'
   end
 
   get '/repos/:organization' do
     content_type :json
     repos(params[:organization]).to_json
+  end
+
+  get '/deploy_keys/:organization' do
+    content_type :json
+    deploy_keys(params[:organization]).to_json
+  end
+
+  get '/deploy_key/:organization/:repository' do
+    content_type :json
+    org, repo = params.values_at(:organization, :repository)
+    github_user.api.deploy_keys("#{org}/#{repo}").map(&:to_h).to_json
   end
 
   get '/:organization/:repository' do
