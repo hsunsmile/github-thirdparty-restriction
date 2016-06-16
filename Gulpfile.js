@@ -5,6 +5,7 @@ var babel = require("gulp-babel");
 var concat = require("gulp-concat");
 var bower = require('gulp-bower');
 var sass = require('gulp-sass');
+var webpack = require('gulp-webpack');
 
 var config = {
   componentPath: './src/assets/javascripts',
@@ -54,12 +55,20 @@ gulp.task("buildCSS", function () {
 gulp.task("buildApp", function () {
   return gulp.src(jsFiles.vendor.concat(jsFiles.source))
     .pipe(sourcemaps.init())
-    .pipe(babel({
-      only: ['**/*.jsx'],
-      compact: false,
-      presets: ['es2015', 'react']
-    }).on('error', gutil.log))
-    .pipe(concat("application.js"))
+    .pipe(webpack({
+      watch: true,
+      entry: 'application.jsx',
+      output: {
+        filename: 'application.js'
+      },
+      module: {
+        loaders: [{
+          test: /\.jsx?$/,
+          exclude: /node_modules/,
+          loader: 'babel'
+        }]
+      },
+    }))
     .pipe(sourcemaps.write("."))
     .pipe(gulp.dest("public/js"));
 });
