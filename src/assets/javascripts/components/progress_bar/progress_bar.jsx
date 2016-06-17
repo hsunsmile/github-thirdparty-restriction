@@ -1,11 +1,12 @@
 import React from 'react'
 import Progress from 'react-progress'
+import Spinner from 'react-spinkit'
 
 module.exports = React.createClass({
   render: function() {
     let props = {
-      percent: this.props.percent || 90,
-      color: this.props.percent ? '#cd201f' : 'grey',
+      percent: this.props.percent || 0,
+      color: '#cd201f',
       style: {
         position: 'relative',
         display:  'block',
@@ -14,7 +15,10 @@ module.exports = React.createClass({
     };
 
     return (
-      <Progress { ...props } />
+      <div>
+        <Progress { ...props } />
+        <Spinner spinnerName='three-bounce' noFadeIn />
+      </div>
     );
   }
 });

@@ -1,11 +1,13 @@
-var React = require('react'),
-  ReactDom = require('react-dom'),
-  UserKeys = require('components/user_keys/user_keys'),
-  RepositoryTable = require('components/repository/repository_table');
+import React from 'react'
+import ReactDom from 'react-dom'
+import UserKeys from 'components/user_keys/user_keys'
+import RepositoryTable from 'components/repository/repository_table'
 
-var r = require("dashboard.scss"),
-  r = require("_bootstrap-variables.scss"),
-  r = require("bootstrap/dist/css/bootstrap.css");
+require("dashboard.scss"),
+require("_bootstrap-variables.scss"),
+require("bootstrap/dist/css/bootstrap.css"),
+require('bootstrap-social/bootstrap-social.css');
+require("font-awesome-webpack");
 
 var NavBar = React.createClass({
   render: function() {
@@ -37,7 +39,7 @@ var Dashboard = React.createClass({
               <UserKeys url="/user" />
             </div>
             <div className="section">
-              <RepositoryTable url="/deploy_keys/zendesk" />
+              <RepositoryTable url="/deploy_keys/zendesk" progressUrl="/progress/deploy_keys" />
             </div>
           </div>
         </div>
@@ -57,7 +59,9 @@ var Application = React.createClass({
   }
 });
 
-ReactDom.render(
-  <Application />,
-  document.getElementById('content')
-);
+if(document.getElementById('content')) {
+  ReactDom.render(
+    <Application />,
+    document.getElementById('content')
+  );
+}

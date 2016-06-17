@@ -54,17 +54,23 @@ class Dashboard < Sinatra::Base
     end
 
     def deploy_keys(organization)
-      repos(organization).map do |repo|
+      repos = repos(organization)
+      repos.each_with_index.map do |repo, idx|
+        progress = (idx*100.0/repos.count).round(2)
+        redis_client.set "fetching_progress_deploy_keys", progress
         cache_key = "deploy_key:#{repo[:id]}"
         keys = cache(cache_key) do
           github_user.api.deploy_keys(repo[:id]) rescue []
         end
         repo[:deploy_keys] = keys.select do |key|
-          key['created_at'] && DateTime.parse(key['created_at']) <= DateTime.parse("2014-02-01 00:00:00 UTC")
+          t = key['created_at']
+          t && DateTime.parse(t.to_s) <= DateTime.parse("2014-02-01 00:00:00 UTC")
         end
         repo
       end.select do |repo|
         !repo[:deploy_keys].empty?
+      end.tap do |repos|
+        redis_client.set "fetching_progress_deploy_keys", 100
       end
     end
 
@@ -99,6 +105,14 @@ class Dashboard < Sinatra::Base
 
   get '/' do
     redirect '/index.html'
+  end
+
+  get '/progress/:type' do
+    content_type :json
+    {
+      type: params[:type],
+      progress: redis_client.get("fetching_progress_#{params[:type]}").to_i || 0
+    }.to_json
   end
 
   get '/repos/:organization' do

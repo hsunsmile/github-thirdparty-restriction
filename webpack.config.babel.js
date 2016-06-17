@@ -18,7 +18,8 @@ module.exports = {
   output: {
     path: './public/js',
     filename: 'application.js',
-    sourceMapFilename: '[file].map'
+    sourceMapFilename: '[file].map',
+    publicPath: "http://localhost:9393/"
   },
 
   resolve: {
@@ -53,12 +54,12 @@ module.exports = {
       loaders: [ 'style', 'css', 'postcss', 'sass' ]
     },
     {
-      test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: "url?limit=10000"
+      test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+      loader: "url-loader?limit=10000&minetype=application/font-woff"
     },
     {
-      test: /\.(ttf|eot|svg)(\?[\s\S]+)?$/,
-      loader: 'file'
+      test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+      loader: "file-loader"
     }]
   },
 

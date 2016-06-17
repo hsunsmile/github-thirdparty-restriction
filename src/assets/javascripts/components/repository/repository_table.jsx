@@ -1,15 +1,16 @@
 import React from 'react'
-import Spinner from 'react-spinkit'
+import Timers from 'react-timers'
 import DataApiMixin from 'mixins/data_api'
 import ProgressBar from 'components/progress_bar/progress_bar'
 import RepositoryHeader from './repository_header'
 import RepositoryRows from './repository_rows'
 
 module.exports = React.createClass({
-  mixins: [DataApiMixin],
+  mixins: [DataApiMixin, Timers],
   getInitialState: function() {
     return {
       showSpinner: true,
+      progress: 0,
       data: []
     };
   },
@@ -20,16 +21,34 @@ module.exports = React.createClass({
         data: data
       });
     });
+
+    if(this.props.progressUrl) {
+      this.setInterval(() => {
+        this.fetchData(this.props.progressUrl).done(data => {
+          this.setState({
+            progress: data.progress
+          });
+          if(data.progress === 100) {
+            this.clearIntervals();
+          }
+        });
+      }, 500);
+    }
   },
   render: function() {
-    let table = <Spinner spinnerName='chasing-dots' />;
+    let table = <ProgressBar percent={this.state.progress} />;
+
     if(!this.state.showSpinner) {
-      table = (
-        <table className="table table-striped" id="repositoriesTable" class="tablesorter">
-          <RepositoryHeader repos={this.state.data}/>
-          <RepositoryRows repos={this.state.data}/>
-        </table>
-      );
+      if(this.state.data.length > 0) {
+        table = (
+          <table className="table table-striped" id="repositoriesTable" class="tablesorter">
+            <RepositoryHeader repos={this.state.data}/>
+            <RepositoryRows repos={this.state.data}/>
+          </table>
+        );
+      } else {
+        table = <p>Congrats! You do you have invalid deploy keys.</p>;
+      }
     }
 
     return (
