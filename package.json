@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "start": "webpack --config webpack.config.babel.js",
+    "start": "thin start -p 9393",
+    "dev": "webpack --config webpack.config.babel.js",
     "twebpack-dev-serverest": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -55,6 +56,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
+    "extract-text-webpack-plugin": "^1.0.1",
     "font-awesome-webpack": "0.0.4",
     "lodash": "^4.13.1",
     "react-bootstrap-table": "^2.3.5",

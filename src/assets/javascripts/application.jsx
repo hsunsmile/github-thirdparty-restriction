@@ -3,23 +3,23 @@ import ReactDom from 'react-dom'
 import UserKeys from 'components/user_keys/user_keys'
 import RepositoryTable from 'components/repository/repository_table'
 
-require("dashboard.scss"),
-require("_bootstrap-variables.scss"),
-require("bootstrap/dist/css/bootstrap.css"),
+require('dashboard.scss'),
+require('_bootstrap-variables.scss'),
+require('bootstrap/dist/css/bootstrap.css'),
 require('bootstrap-social/bootstrap-social.css');
-require("font-awesome-webpack");
+require('font-awesome/css/font-awesome.css');
 
 var NavBar = React.createClass({
   render: function() {
     return (
-      <nav className="navbar navbar-inverse navbar-fixed-top">
-        <div className="container-fluid">
-          <div className="navbar-header">
-            <a className="navbar-brand" href="#">Third-party application restrictions</a>
+      <nav className='navbar navbar-inverse navbar-fixed-top'>
+        <div className='container-fluid'>
+          <div className='navbar-header'>
+            <a className='navbar-brand' href='#'>Third-party application restrictions</a>
           </div>
-          <div id="navbar" className="navbar-collapse collapse">
-            <ul className="nav navbar-nav navbar-right">
-              <li><a href="/logout">Logout</a></li>
+          <div id='navbar' className='navbar-collapse collapse'>
+            <ul className='nav navbar-nav navbar-right'>
+              <li><a href='/logout'>Logout</a></li>
             </ul>
           </div>
         </div>
@@ -31,15 +31,15 @@ var NavBar = React.createClass({
 var Dashboard = React.createClass({
   render: function() {
     return (
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 main">
+      <div className='container-fluid'>
+        <div className='row'>
+          <div className='col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 main'>
             <h2>Github third party app restictions</h2>
-            <div className="section">
-              <UserKeys url="/user" />
+            <div className='section'>
+              <UserKeys url='/user' />
             </div>
-            <div className="section">
-              <RepositoryTable url="/deploy_keys/zendesk" progressUrl="/progress/deploy_keys" />
+            <div className='section'>
+              <RepositoryTable url='/deploy_keys/zendesk' progressUrl='/progress/deploy_keys' />
             </div>
           </div>
         </div>
@@ -59,9 +59,9 @@ var Application = React.createClass({
   }
 });
 
-if(document.getElementById('content')) {
+if(document.getElementById('application')) {
   ReactDom.render(
     <Application />,
-    document.getElementById('content')
+    document.getElementById('application')
   );
 }

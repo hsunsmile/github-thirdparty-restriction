@@ -1,4 +1,5 @@
 import LodashModuleReplacementPlugin from 'lodash-webpack-plugin'
+import ExtractTextPlugin from 'extract-text-webpack-plugin'
 import NpmInstallPlugin from "npm-install-webpack-plugin"
 import webpack from 'webpack'
 import path from 'path'
@@ -16,10 +17,9 @@ module.exports = {
   ],
 
   output: {
-    path: './public/js',
+    path: './public/assets',
     filename: 'application.js',
-    sourceMapFilename: '[file].map',
-    publicPath: "http://localhost:9393/"
+    sourceMapFilename: '[file].map'
   },
 
   resolve: {
@@ -47,11 +47,11 @@ module.exports = {
     },
     {
       test: /\.css$/,
-      loaders: [ 'style', 'css', 'postcss' ]
+      loader: ExtractTextPlugin.extract('style', ['css', 'postcss'])
     },
     {
       test: /\.scss$/,
-      loaders: [ 'style', 'css', 'postcss', 'sass' ]
+      loader: ExtractTextPlugin.extract('style', ['css', 'postcss', 'sass'])
     },
     {
       test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -70,6 +70,7 @@ module.exports = {
       '_': 'lodash'
     }),
     new LodashModuleReplacementPlugin,
+    new ExtractTextPlugin("application.css")
     // new webpack.optimize.OccurenceOrderPlugin,
     // new webpack.optimize.UglifyJsPlugin
   ]

@@ -5,10 +5,12 @@ require 'rack'
 require 'time'
 require 'json'
 
+require './src/configuration'
+
 class Dashboard < Sinatra::Base
   enable :sessions
 
-  set :root, File.expand_path('../../', File.dirname(__FILE__))
+  set :root, File.expand_path('../', File.dirname(__FILE__))
   set :views, Proc.new{ File.join(root, 'src', 'assets') }
   set :public_folder, Proc.new{ File.join(root, 'public') }
   set :scss, {:style => :compact, :debug_info => false}
@@ -152,8 +154,3 @@ class Dashboard < Sinatra::Base
   end
 end
 
-class DashboardCommand < Clamp::Command
-  def execute
-    Rack::Handler::WEBrick.run(Dashboard.new, Port: 9393)
-  end
-end
