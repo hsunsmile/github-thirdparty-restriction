@@ -15,7 +15,7 @@ module.exports = React.createClass({
     };
 
     return (
-      <div>
+      <div className='progress-container'>
         <Progress { ...props } />
         <Spinner spinnerName='three-bounce' noFadeIn />
       </div>

@@ -1,3 +1,4 @@
+require 'octokit'
 require 'redis'
 
 Octokit.configure do |c|

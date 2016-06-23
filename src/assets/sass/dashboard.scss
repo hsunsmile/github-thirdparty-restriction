@@ -89,15 +89,33 @@ body {
     margin-top: 50px;
   }
 
+  .subsection {
+    margin-top: 20px;
+  }
+
   .bg-info {
     padding-top: 30px;
     padding-bottom: 30px;
   }
 }
 
-.spinner {
-  margin-top: 60px;
-  margin-left: 45%;
+.progress-container {
+  width: 100%;
+  .spinner {
+    width: 100%;
+    margin: auto;
+  }
+}
+
+.inner {
+  display: inline-block;
+}
+
+.table-responsive {
+  .repository-table {
+    margin-top: 20px;
+    min-height: 200px;
+  }
 }
 
 /*

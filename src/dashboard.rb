@@ -4,6 +4,7 @@ require 'sinatra_auth_github'
 require 'rack'
 require 'time'
 require 'json'
+require 'uri'
 
 require './src/configuration'
 
@@ -16,7 +17,7 @@ class Dashboard < Sinatra::Base
   set :scss, {:style => :compact, :debug_info => false}
 
   set :github_options, {
-    :scopes    => 'write:public_key,admin:repo_hook,repo',
+    :scopes    => 'user,write:public_key,admin:repo_hook,repo',
     :secret    => ENV['GITHUB_CLIENT_SECRET'],
     :client_id => ENV['GITHUB_CLIENT_ID'],
   }
@@ -39,40 +40,57 @@ class Dashboard < Sinatra::Base
       value
     end
 
+    def organizations
+      github_user.api.organizations.map(&:to_h).map{|i| i.fetch(:login)}
+    end
+
     def repos(organization)
-      cache_key = "repo:#{organization}"
-      repos = cache(cache_key) do
+      cache("repo:#{organization}") do
         github_user.api.organization_repositories(organization)
-      end
-      repos.inject([]) do |a, repo|
-        a << {
-          id:          repo['id'],
-          name:        repo['name'],
-          description: repo['description'],
-          created_at:  repo['created_at']
-        }
-        a
       end
     end
 
     def deploy_keys(organization)
       repos = repos(organization)
+      progress_key = "fetching_progress_deploy_keys:#{organization}"
       repos.each_with_index.map do |repo, idx|
         progress = (idx*100.0/repos.count).round(2)
-        redis_client.set "fetching_progress_deploy_keys", progress
-        cache_key = "deploy_key:#{repo[:id]}"
+        redis_client.set progress_key, progress
+        cache_key = "deploy_key:#{repo['id']}"
         keys = cache(cache_key) do
-          github_user.api.deploy_keys(repo[:id]) rescue []
+          github_user.api.deploy_keys(repo['id']) rescue ["Failed to get"]
         end
-        repo[:deploy_keys] = keys.select do |key|
+        repo['deploy_keys'] = keys.select do |key|
           t = key['created_at']
           t && DateTime.parse(t.to_s) <= DateTime.parse("2014-02-01 00:00:00 UTC")
         end
         repo
       end.select do |repo|
-        !repo[:deploy_keys].empty?
-      end.tap do |repos|
-        redis_client.set "fetching_progress_deploy_keys", 100
+        !repo['deploy_keys'].empty?
+      end.tap do
+        redis_client.set progress_key, 100
+      end
+    end
+
+    def hooks(organization)
+      repos = repos(organization)
+      progress_key = "fetching_progress_hooks:#{organization}"
+      repos.each_with_index.map do |repo, idx|
+        progress = (idx*100.0/repos.count).round(2)
+        redis_client.set progress_key, progress
+        cache_key = "hook:#{repo['id']}"
+        keys = cache(cache_key) do
+          github_user.api.hooks(repo['id']) rescue []
+        end
+        repo['hooks'] = keys.select do |key|
+          t = key['created_at']
+          t && DateTime.parse(t.to_s) >= DateTime.parse("2014-05-01 00:00:00 UTC")
+        end
+        repo
+      end.select do |repo|
+        !repo['hooks'].empty?
+      end.tap do
+        redis_client.set progress_key, 100
       end
     end
 
@@ -94,7 +112,7 @@ class Dashboard < Sinatra::Base
 
   before do
     p = request.path_info.split('/')[1]
-    pass if p =~ /\.html$|auth.*/
+    pass if p =~ /auth.*/
     unless authenticated?
       redirect '/401.html'
     end
@@ -109,22 +127,71 @@ class Dashboard < Sinatra::Base
     redirect '/index.html'
   end
 
-  get '/progress/:type' do
+  get '/progress/:type/:repository' do
+    progress_key = "fetching_progress_#{params[:type]}:#{params[:repository]}"
     content_type :json
     {
       type: params[:type],
-      progress: redis_client.get("fetching_progress_#{params[:type]}").to_i || 0
+      repository: params[:repository],
+      progress: redis_client.get(progress_key).to_i || 0
     }.to_json
+  end
+
+  get '/organizations' do
+    content_type :json
+    organizations.to_json
   end
 
   get '/repos/:organization' do
     content_type :json
-    repos(params[:organization]).to_json
+    repos(params[:organization]).inject([]) do |a, repo|
+      a << {
+        name:        repo['name'],
+        description: repo['description'],
+        created_at:  repo['created_at']
+      }
+      a
+    end.to_json
   end
 
   get '/deploy_keys/:organization' do
     content_type :json
-    deploy_keys(params[:organization]).to_json
+    deploy_keys(params[:organization]).inject([]) do |a, repo|
+      a << {
+        name:        repo['name'],
+        description: repo['description'],
+        created_at:  repo['created_at'],
+        deploy_keys: repo['deploy_keys']
+      }
+      a
+    end.to_json
+  end
+
+  get '/hooks/:organization' do
+    content_type :json
+    hooks(params[:organization]).inject([]) do |a, repo|
+      repo['hooks'].each do |hook|
+        url = hook['config']['url']
+        host = url ? URI.parse(url).host : ''
+        type = hook['name']
+
+        i = a.find {|item| item[:type] == type && item[:host] == host}
+        if i
+          i[:repos] << {title: repo['name']}
+          i[:count] += 1
+        else
+          a << {
+            type: hook['name'],
+            host: host,
+            count: 1,
+            repos: [ {title: repo['name']} ]
+          }
+        end
+      end
+      a
+    end.sort_by do |hook|
+      hook[:count]
+    end.reverse.to_json
   end
 
   get '/deploy_key/:organization/:repository' do

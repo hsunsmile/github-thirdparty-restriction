@@ -1,13 +1,17 @@
 import React from 'react'
 import ReactDom from 'react-dom'
 import UserKeys from 'components/user_keys/user_keys'
-import RepositoryTable from 'components/repository/repository_table'
+import Orgnization from 'components/organization/organization'
+import { Button } from 'react-toolbox/lib/button'
 
-require('dashboard.scss'),
-require('_bootstrap-variables.scss'),
-require('bootstrap/dist/css/bootstrap.css'),
-require('bootstrap-social/bootstrap-social.css');
-require('font-awesome/css/font-awesome.css');
+import jQuery from 'jquery/dist/jquery.js'
+import Bootstrap from 'bootstrap/dist/css/bootstrap.css'
+import BootstrapJS from 'bootstrap/dist/js/bootstrap.js'
+
+import BootstrapSocial from 'bootstrap-social/bootstrap-social.css'
+import FontAwesome from 'font-awesome/css/font-awesome.css'
+import DashboardCSS from 'dashboard.scss'
+import BootstrapVar from '_bootstrap-variables.scss'
 
 var NavBar = React.createClass({
   render: function() {
@@ -39,7 +43,7 @@ var Dashboard = React.createClass({
               <UserKeys url='/user' />
             </div>
             <div className='section'>
-              <RepositoryTable url='/deploy_keys/zendesk' progressUrl='/progress/deploy_keys' />
+              <Orgnization dropdownUrl='/organizations' />
             </div>
           </div>
         </div>

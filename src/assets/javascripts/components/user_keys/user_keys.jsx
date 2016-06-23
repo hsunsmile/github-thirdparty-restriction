@@ -1,32 +1,33 @@
 import DataApiMixin from 'mixins/data_api'
 import React from 'react'
-import Spinner from 'react-spinkit'
+import ProgressBar from 'components/progress_bar/progress_bar'
 
 module.exports = React.createClass({
   mixins: [DataApiMixin],
   getInitialState: function() {
     return {
-      showSpinner: true,
+      progress: 0,
       data: {}
     };
   },
   componentDidMount: function() {
     this.fetchData(this.props.url).done(data => {
       this.setState({
-        showSpinner: false,
+        progress: 100,
         data: data
       });
     });
   },
   render: function() {
-    let keys = this.state.data.keys || [];
-    let hasInvalidKeys = this.state.data.invalid_keys_count > 0;
-    let message = <Spinner spinnerName='chasing-dots' />;
+    let user = this.state.data;
+    let keys = user.keys || [];
+    let hasInvalidKeys = user.invalid_keys_count > 0;
+    let message = <ProgressBar percent={this.state.progress} />;
 
-    if(!this.state.showSpinner) {
+    if(this.state.progress === 100) {
       message = hasInvalidKeys ?
-        <p>You have {this.state.data.invalid_keys_count} ssh keys, select them for update.</p> :
-        <p>Congrats, you do not have invalid ssh keys.</p>;
+        <p>{user.login}, you have {user.invalid_keys_count} ssh keys, select them for update.</p> :
+        <p>Congrats {user.login}, you have {keys.length} ssh key(s) registered, none of them are invalid.</p>;
     }
 
     return (
