@@ -45,10 +45,10 @@ module.exports = React.createClass({
       let content = <p></p>;
       if(this.state.data.length > 0) {
         content = (
-          <div>
+          <div className="inside">
             <button className="btn btn-primary dropdown-toggle" type="button" id="menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {this.props.title}
-            <span className="caret"></span>
+              {this.props.title}
+              <span className="caret"></span>
             </button>
             {this.items(this.state.data)}
           </div>
@@ -59,7 +59,7 @@ module.exports = React.createClass({
 
       dropdownList = (
         <div className="dropdown">
-          <h4>{this.props.successMessage}</h4>
+          <h4 className='inner'>{this.props.successMessage}</h4>
           {content}
         </div>
       );

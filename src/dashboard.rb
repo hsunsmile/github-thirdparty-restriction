@@ -79,10 +79,10 @@ class Dashboard < Sinatra::Base
         progress = (idx*100.0/repos.count).round(2)
         redis_client.set progress_key, progress
         cache_key = "hook:#{repo['id']}"
-        keys = cache(cache_key) do
+        hooks = cache(cache_key) do
           github_user.api.hooks(repo['id']) rescue []
         end
-        repo['hooks'] = keys.select do |key|
+        repo['hooks'] = hooks.select do |key|
           t = key['created_at']
           t && DateTime.parse(t.to_s) >= DateTime.parse("2014-05-01 00:00:00 UTC")
         end
@@ -101,11 +101,12 @@ class Dashboard < Sinatra::Base
     def user
       keys = github_user.api.keys
       github_user.attribs.to_h.merge(
-        keys_count: keys.count,
-        invalid_keys_count: keys.select do |key|
+        invalid_keys: keys.select do |key|
           key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC")
-        end.count,
-        keys: keys.map(&:to_h)
+        end.map(&:to_h),
+        valid_keys: keys.select do |key|
+          key['created_at'] > Time.parse("2014-02-01 00:00:00 UTC")
+        end.map(&:to_h)
       )
     end
   end

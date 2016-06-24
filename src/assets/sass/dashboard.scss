@@ -87,6 +87,15 @@ body {
 
   .section {
     margin-top: 50px;
+    padding-left: 0px;
+
+    label.checkbox {
+      margin-left: 20px;
+    }
+
+    .key-block {
+      padding-left: 0px;
+    }
   }
 
   .subsection {
@@ -111,10 +120,51 @@ body {
   display: inline-block;
 }
 
+pre {
+  white-space: pre-wrap;
+  font: 12px/1.4em Consolas,'Liberation Mono',Courier,monospace;
+}
+
+.highlight {
+  background-color: #fafafb;
+}
+
+.highlight-headers {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-bottom: 1px solid #CACACA;
+  border-radius: 3px 3px 0 0;
+  font: 12px/1.4em Consolas,'Liberation Mono',Courier,monospace;
+
+  span.new-line {
+    display: block;
+    max-width: 50%;
+  }
+
+  &+pre.highlight {
+    margin-top: -2px;
+    border-radius: 0 0 3px 3px;
+  }
+
+  &.info {
+    background-color: #dff0d8;
+    border-color: #def5d4;
+  }
+
+  &.attention {
+    background-color: #f5d4d3;
+    border-color: #f7b2b0;
+  }
+}
+
 .table-responsive {
   .repository-table {
     margin-top: 20px;
     min-height: 200px;
+
+    .repository-cell {
+      font: 12px/1.4em Consolas,'Liberation Mono',Courier,monospace;
+    }
   }
 }
 
