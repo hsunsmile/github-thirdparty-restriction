@@ -11,7 +11,7 @@ def logger
   end
 end
 
-def client
+def github_client
   @client ||= Octokit::Client.new(:netrc => true).tap do |c|
     c.user.login
   end

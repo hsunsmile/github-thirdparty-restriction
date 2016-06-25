@@ -26,10 +26,14 @@ module.exports = React.createClass({
   },
 
   keyBlock: function(key, idx, extraClassNames) {
+    let updateButton = (extraClassNames === 'attention') ?
+      <a className='pull-right btn btn-primary btn-mini'  href="#" role="button" onClick={this.updateSSHKey.bind(this, key)}>Update</a> :
+      <span></span>;
+
     return (
       <div className='key-block inner' key={`keyBlock-${idx}`}>
         <div className={`highlight highlight-headers ${extraClassNames}`}>
-          <a className="pull-right btn btn-primary btn-mini" href="#" role="button" onClick={this.updateSSHKey.bind(this, key)}>Update</a>
+          {updateButton}
           <div>{`Title: ${key.title}`}</div>
           <div>{`Created at: ${key.created_at}`}</div>
         </div>
@@ -55,7 +59,7 @@ module.exports = React.createClass({
       return this.keyBlock(key, idx, 'info');
     });
 
-    let invalidkeyBlocks = _.map(invalidKeys, (invalid_keys, idx) => {
+    let invalidkeyBlocks = _.map(invalidKeys, (key, idx) => {
       return this.keyBlock(key, idx, 'attention');
     });
 
