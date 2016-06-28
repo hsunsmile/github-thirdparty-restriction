@@ -14,7 +14,7 @@ import DashboardCSS from 'dashboard.scss'
 import BootstrapVar from '_bootstrap-variables.scss'
 
 var NavBar = React.createClass({
-  render: function() {
+  render() {
     return (
       <nav className='navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
@@ -33,7 +33,7 @@ var NavBar = React.createClass({
 });
 
 var Dashboard = React.createClass({
-  render: function() {
+  render() {
     return (
       <div className='container-fluid'>
         <div className='row'>
@@ -53,7 +53,7 @@ var Dashboard = React.createClass({
 });
 
 var Application = React.createClass({
-  render: function() {
+  render() {
     return (
       <div>
         <NavBar />

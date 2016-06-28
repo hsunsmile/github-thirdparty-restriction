@@ -5,8 +5,9 @@ require 'rack'
 require 'time'
 require 'json'
 require 'uri'
+require 'byebug'
 
-require './src/github/command'
+require './src/workers/github/command'
 
 class Dashboard < Sinatra::Base
   enable :sessions
@@ -33,36 +34,17 @@ class Dashboard < Sinatra::Base
       github_user.api.organizations.map(&:to_h).map{|i| i.fetch(:login)}
     end
 
-    #repo['deploy_keys'] = keys.select do |key|
-    #        t = key['created_at']
-    #        t && DateTime.parse(t.to_s) <= DateTime.parse("2014-02-01 00:00:00 UTC")
-    #      end
-    #      repo
-    #    end.select do |repo|
-    #      !repo['deploy_keys'].empty?
     def deploy_keys(organization)
-      Github::DeployKeys.new.tap do |c|
-        c.organization = organization
-        c.client = github_user.api
-        c.errback do |res|
-          puts "failed to fetch deploy keys: #{res}"
-        end
-        c.run
+      DeployKeys.new.tap do |r|
+        r.organization = organization
+        DeployKeysWorker.perform_async(organization)
       end
     end
 
-    # repo['hooks'] = hooks.select do |key|
-    #   t = key['created_at']
-    #   t && DateTime.parse(t.to_s) >= DateTime.parse("2014-05-01 00:00:00 UTC")
-    # end
     def hooks(organization)
-      Github::Hooks.new.tap do |c|
-        c.organization = organization
-        c.client = github_user.api
-        c.errback do |res|
-          puts "failed to fetch deploy keys: #{res}"
-        end
-        c.fetch_repositories
+      Hooks.new.tap do |r|
+        r.organization = organization
+        HooksWorker.perform_async(organization)
       end
     end
 
@@ -93,6 +75,7 @@ class Dashboard < Sinatra::Base
 
   get '/authenticate' do
     authenticate!
+    redis_client.set 'github_client:access_token', github_user.api.access_token
     redirect '/index.html'
   end
 
@@ -115,55 +98,70 @@ class Dashboard < Sinatra::Base
     organizations.to_json
   end
 
-  # deploy_keys(params[:organization]).inject([]) do |a, repo|
-  #   a << {
-  #     name:        repo['name'],
-  #     description: repo['description'],
-  #     created_at:  repo['created_at'],
-  #     deploy_keys: repo['deploy_keys']
-  #   }
-  #   a
-  # end.to_json
   get '/deploy_keys/:organization' do
     content_type :json
     command = deploy_keys(params[:organization])
+    result = command.result.inject([]) do |a, repo|
+      if repo
+        target_keys = repo['deploy_keys'].select do |key|
+          t = key['created_at']
+          t && DateTime.parse(t.to_s) <= DateTime.parse("2014-02-01 00:00:00 UTC")
+        end
+        if target_keys.count > 0
+          a << {
+            name:        repo['name'],
+            description: repo['description'],
+            created_at:  repo['created_at'],
+            deploy_keys: repo['deploy_keys']
+          }
+        end
+      end
+      a
+    end
+
     {
       progress: command.current_progress,
-      results: command.result
+      results: result,
+      error: command.error
     }.to_json
   end
 
   get '/hooks/:organization' do
     content_type :json
-    hooks(params[:organization]).inject([]) do |a, repo|
-      repo['hooks'].each do |hook|
-        url = hook['config']['url']
-        host = url ? URI.parse(url).host : ''
-        type = hook['name']
-
-        i = a.find {|item| item[:type] == type && item[:host] == host}
-        if i
-          i[:repos] << {title: repo['name']}
-          i[:count] += 1
-        else
-          a << {
-            type: hook['name'],
-            host: host,
-            count: 1,
-            repos: [ {title: repo['name']} ]
-          }
+    command = hooks(params[:organization])
+    result = command.result.inject([]) do |a, repo|
+      if repo
+        repo['hooks'].select do |key|
+          t = key['created_at']
+          t && DateTime.parse(t.to_s) >= DateTime.parse("2014-05-01 00:00:00 UTC")
+        end.each do |hook|
+          url = hook['config']['url']
+          host = url ? URI.parse(url).host : ''
+          type = hook['name']
+          i = a.find {|item| item[:type] == type && item[:host] == host}
+          if i
+            i[:repos] << {title: repo['name']}
+            i[:count] += 1
+          else
+            a << {
+              type: hook['name'],
+              host: host,
+              count: 1,
+              repos: [ {title: repo['name']} ]
+            }
+          end
         end
       end
       a
     end.sort_by do |hook|
       hook[:count]
-    end.reverse.to_json
-  end
+    end.reverse
 
-  get '/deploy_key/:organization/:repository' do
-    content_type :json
-    org, repo = params.values_at(:organization, :repository)
-    github_user.api.deploy_keys("#{org}/#{repo}").map(&:to_h).to_json
+    {
+      progress: command.current_progress,
+      results: result,
+      error: command.error
+    }.to_json
   end
 
   get '/:organization/:repository' do

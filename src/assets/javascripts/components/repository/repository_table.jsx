@@ -10,31 +10,25 @@ import RepositoryRows from './repository_rows'
 module.exports = React.createClass({
   mixins: [DataApiMixin, Timers],
 
-  getInitialState: function() {
+  getInitialState() {
     return {
       fetchingStatus: 'init',
       progress: 0,
       data: [],
+      error: null
     };
   },
 
-  getInformation: function(url) {
-    this.fetchData(url).done(data => {
-      this.setState({
-        fetchingStatus: 'done',
-        data: data
-      });
-    });
-  },
-
-  getProgress: function(url) {
+  getInformation(url) {
     if(url) {
       this.setInterval(() => {
         this.fetchData(url).done(data => {
           this.setState({
-            progress: data.progress
+            data: data.results,
+            progress: data.progress,
+            error: data.error
           });
-          if(data.progress === 100) {
+          if(data.progress === 100 || data.error) {
             this.clearIntervals();
           }
         });
@@ -42,33 +36,35 @@ module.exports = React.createClass({
     }
   },
 
-  updateOrganization: function(props) {
+  updateOrganization(props) {
     let organization = props.organization,
       type = props.type;
 
     this.setState({
+      progress: 0,
       fetchingStatus: 'onGoing',
-      data: []
+      data: [],
+      error: null
     });
 
     this.getInformation(`/${type}/${organization}`);
-    this.getProgress(`/progress/${type}/${organization}`);
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     this.updateOrganization(this.props);
   },
 
-  componentWillReceiveProps: function(nextProps) {
+  componentWillReceiveProps(nextProps) {
     this.updateOrganization(nextProps);
   },
 
-  informationTable: function() {
+  informationTable() {
     let table = <p></p>;
 
     if(this.state.fetchingStatus !== 'init') {
       let content = <ProgressBar percent={this.state.progress} />;
-      if(this.state.fetchingStatus === 'done') {
+
+      if(this.state.progress === 100 || this.state.error) {
         if(this.state.data.length > 0) {
           content = (
             <table className="table table-striped" id="repositoriesTable" class="tablesorter">
@@ -78,6 +74,15 @@ module.exports = React.createClass({
           );
         } else {
           content = <p>Congrats! You do you have invalid deploy keys.</p>;
+
+          if(this.state.error) {
+            content = (
+              <div className="subsection bg-warning">
+                <h6>Failed to perform API requests, you might not have right permissions.</h6>
+                <pre>{this.state.error}</pre>
+              </div>
+            );
+          }
         }
       }
 
@@ -91,7 +96,7 @@ module.exports = React.createClass({
     return table;
   },
 
-  render: function() {
+  render() {
     return (
       <div className="repository">
         {this.informationTable()}
