@@ -40,7 +40,7 @@ var Dashboard = React.createClass({
           <div className='col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 main'>
             <h2>Github third party app restictions</h2>
             <div className='section'>
-              <UserKeys url='/user' />
+              <UserKeys url='/user' updateUrl='/user_keys' />
             </div>
             <div className='section'>
               <Orgnization dropdownUrl='/organizations' />

@@ -15,14 +15,14 @@ module.exports = React.createClass({
     });
   },
 
-  resultsTable(type, purpose) {
+  resultsTable(url, purpose) {
     let table = <p></p>,
       organization = this.state.organization;
 
     if(organization.length > 0) {
       table = (
         <div className="subsection">
-          <RepositoryTable organization={organization} type={type} purpose={purpose}/>
+          <RepositoryTable url={url} purpose={purpose}/>
         </div>
       );
     }
@@ -30,8 +30,12 @@ module.exports = React.createClass({
   },
 
   render() {
-    let deployKeysTable = this.resultsTable('deploy_keys', "Deploy keys, created before February 2014,  immediately lose access to the organization's resources"),
-      hooksTable = this.resultsTable('hooks', "Hooks, created after May 2014, deliveries from private organization repositories will no longer be sent to unapproved applications.");
+    let deployKeysInvalidUrl = `/deploy_keys/${this.state.organization}/before_2014_02`,
+      deployKeysTable = this.resultsTable(deployKeysInvalidUrl, "Deploy keys, created before February 2014,  immediately lose access to the organization's resources"),
+      deployKeysAfterInvalidUrl = `/deploy_keys/${this.state.organization}/after_2014_02`,
+      deployKeysAfter201402Table = this.resultsTable(deployKeysAfterInvalidUrl, "Deploy keys, created by applicaitons after February 2014, immediately lose access to the organization's resources"),
+      hooksUrl = `/hooks/${this.state.organization}`,
+      hooksTable = this.resultsTable(hooksUrl, "Hooks, created after May 2014, deliveries from private organization repositories will no longer be sent to unapproved applications.");
 
     return (
       <div className="organization">
@@ -41,6 +45,7 @@ module.exports = React.createClass({
           url={this.props.dropdownUrl} onSelect={this.onSelect} />
 
         {deployKeysTable}
+        {deployKeysAfter201402Table}
         {hooksTable}
       </div>
     );

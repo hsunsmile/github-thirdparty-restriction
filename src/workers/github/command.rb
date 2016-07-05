@@ -23,6 +23,7 @@ class Command
   def cache(key, ttl = 7200, &block)
     puts "cache getting #{key}"
     value = redis_client.get key
+    value = check_value(value)
     if !value
       puts "calling block"
       value = block.call
@@ -35,6 +36,13 @@ class Command
   rescue JSON::ParserError
     puts "invalid cached value, del key #{key}"
     redis_client.del key
+  rescue => e
+    puts "invalid cached value, #{e.message}, del key #{key}"
+    redis_client.del key
+  end
+
+  def check_value(value)
+    value
   end
 
   def skip_cache
@@ -69,7 +77,7 @@ class Command
 
   def set_error(error)
     raise "error key is not set." unless error_key
-    redis_client.set error_key, error
+    redis_client.setex error_key, 60, error
   end
 
   def result(default="[]")
@@ -125,6 +133,11 @@ class Repository < Command
     "error_repository:#{organization}"
   end
 
+  def check_value(value)
+    return nil if value.nil? || JSON.parse(value).empty?
+    value
+  end
+
   def command
     ->() {
       client.organization_repositories(organization).map(&:to_h)
@@ -140,6 +153,11 @@ end
 
 class SubCommand < Command
   attr_accessor :organization, :repositories
+
+  def check_value(value)
+    return nil if value.nil? || JSON.parse(value).empty?
+    value
+  end
 
   def subcommand
     raise "subcommand must be defined in sub classes"

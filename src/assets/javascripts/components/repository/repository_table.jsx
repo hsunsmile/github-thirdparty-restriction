@@ -37,8 +37,7 @@ module.exports = React.createClass({
   },
 
   updateOrganization(props) {
-    let organization = props.organization,
-      type = props.type;
+    let url = props.url;
 
     this.setState({
       progress: 0,
@@ -47,7 +46,7 @@ module.exports = React.createClass({
       error: null
     });
 
-    this.getInformation(`/${type}/${organization}`);
+    this.getInformation(url);
   },
 
   componentDidMount() {

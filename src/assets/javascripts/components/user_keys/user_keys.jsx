@@ -5,14 +5,14 @@ import ProgressBar from 'components/progress_bar/progress_bar'
 module.exports = React.createClass({
   mixins: [DataApiMixin],
 
-  getInitialState: function() {
+  getInitialState() {
     return {
       progress: 0,
       data: {}
     };
   },
 
-  componentDidMount: function() {
+  fetchUserInformation() {
     this.fetchData(this.props.url).done(data => {
       this.setState({
         progress: 100,
@@ -21,11 +21,25 @@ module.exports = React.createClass({
     });
   },
 
-  updateSSHKey: function(key) {
-    console.log('updateSSHKey is called: ' + key.id);
+  componentDidMount() {
+    this.fetchUserInformation();
   },
 
-  keyBlock: function(key, idx, extraClassNames) {
+  resetState() {
+    this.setState({
+      progress: 0,
+      data: []
+    });
+  },
+
+  updateSSHKey(key) {
+    this.resetState();
+    this.postData(this.props.updateUrl, key).done(data => {
+      this.fetchUserInformation();
+    });
+  },
+
+  keyBlock(key, idx, extraClassNames) {
     let updateButton = (extraClassNames === 'attention') ?
       <a className='pull-right btn btn-primary btn-mini'  href="#" role="button" onClick={this.updateSSHKey.bind(this, key)}>Update</a> :
       <span></span>;
@@ -42,7 +56,7 @@ module.exports = React.createClass({
     );
   },
 
-  render: function() {
+  render() {
     let user = this.state.data;
     let validKeys = user.valid_keys || [];
     let invalidKeys = user.invalid_keys || [];
