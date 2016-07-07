@@ -32,13 +32,14 @@ module.exports = React.createClass({
             this.clearIntervals();
           }
         });
-      }, 500);
+      }, 1000);
     }
   },
 
   updateOrganization(props) {
     let url = props.url;
 
+    this.clearTimers();
     this.setState({
       progress: 0,
       fetchingStatus: 'onGoing',

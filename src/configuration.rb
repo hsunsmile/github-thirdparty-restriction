@@ -1,6 +1,8 @@
 require 'octokit'
 require 'redis'
 
+Encoding.default_external = "utf-8"
+
 Octokit.configure do |c|
   c.auto_paginate = true
 end
@@ -18,5 +20,8 @@ def github_client
 end
 
 def redis_client
-  @redis_client ||= Redis.new(:host => "127.0.0.1", :port => 6379, :db => 0)
+  @redis_client ||= begin
+                      redis_uri = URI(ENV.fetch('REDIS_URL', 'redis://localhost:6379/'))
+                      Redis.new(host: redis_uri.host, port: redis_uri.port, :db => 0)
+                    end
 end

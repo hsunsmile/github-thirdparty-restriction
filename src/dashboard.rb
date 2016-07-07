@@ -8,7 +8,6 @@ require 'rack'
 require 'time'
 require 'json'
 require 'uri'
-require 'byebug'
 
 require './src/workers/github/command'
 
@@ -21,9 +20,7 @@ class Dashboard < Sinatra::Base
   set :scss, {:style => :compact, :debug_info => false}
 
   set :github_options, {
-    :scopes    => 'user,admin:public_key,admin:repo_hook,repo',
-    :secret    => ENV['GITHUB_CLIENT_SECRET'],
-    :client_id => ENV['GITHUB_CLIENT_ID'],
+    scopes: 'user,admin:public_key,admin:repo_hook,repo'
   }
 
   configure :development do

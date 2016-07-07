@@ -7,12 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "start": "npm run servers & npm run worker & npm run webpack",
+    "start": "npm run web-server & npm run worker & npm run webpack",
     "servers": "npm run db-server & npm run web-server",
-    "web-server": "thin start -p 9393",
+    "web-server": "bundle exec thin start -p 9393",
     "db-server": "redis-server",
     "worker": "bundle exec sidekiq -r ./src/workers/github/command.rb",
-    "webpack": "webpack --config webpack.config.babel.js"
+    "compile": "webpack -p --config webpack.config.babel.js",
+    "webpack": "webpack --watch --config webpack.config.babel.js"
   },
   "repository": {
     "type": "git",

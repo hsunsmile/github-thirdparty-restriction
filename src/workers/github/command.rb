@@ -10,6 +10,7 @@ require './src/configuration'
 
 class Command
   include Sidekiq::Worker
+  sidekiq_options :retry => false, :backtrace => true
 
   def client
     access_token = redis_client.get 'github_client:access_token'
@@ -39,6 +40,7 @@ class Command
   rescue => e
     puts "invalid cached value, #{e.message}, del key #{key}"
     redis_client.del key
+    raise e
   end
 
   def check_value(value)

@@ -6,10 +6,6 @@ import path from 'path'
 import autoprefixer from 'autoprefixer'
 
 module.exports = {
-  watch: true,
-  cache: true,
-  debug: true,
-
   devtool: 'source-map',
 
   entry: [
@@ -69,6 +65,16 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery',
       '_': 'lodash'
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      compress:{
+        warnings: true
+      }
+    }),
+    new webpack.DefinePlugin({
+      'process.env':{
+        'NODE_ENV': JSON.stringify('production')
+      }
     }),
     new LodashModuleReplacementPlugin,
     new ExtractTextPlugin("application.css")

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href='assets/application.css' rel='stylesheet' />
+    <title>Sasuke</title>
+  </head>
+  <body>
+    <div class="row main">
+      <h3 class="col-sm-10 col-sm-offset-1">Setting up third-party application restrictions</h3>
+      <div class="col-sm-10 col-sm-offset-1 bg-info section">
+        <ul>
+          <li>
+          <strong>Applications that are owned by the organization</strong> are automatically given access to the organization's resources.</li>
+          <li>
+          <strong>Third-party applications</strong> immediately lose access to the organization's resources.</li>
+          <li>
+          <strong>SSH keys created before February 2014</strong> immediately lose access to the organization's resources (this includes user and deploy keys).</li>
+          <li>
+          <strong>SSH keys created by applications during or after February 2014</strong> immediately lose access to the organization's resources.</li>
+          <li>
+          <strong>Hook deliveries from private organization repositories</strong> will no longer be sent to unapproved applications.</li>
+          <li>
+          <strong>API access</strong> to private organization resources is not available for unapproved applications. In addition, there is no create, update, or delete access to public organization resources.</li>
+          <li>
+          <strong>Hooks created by users and hooks created before May 2014</strong> will not be affected.</li>
+          <li>
+          <strong>Private forks of organization-owned repositories</strong> are subject to the organization's access restrictions.</li>
+        </ul>
+      </div>
+
+      <div class="section col-sm-4 col-sm-offset-4">
+        <a href="/authenticate" class="btn btn-block btn-social btn-lg btn-github">
+          <i class="fa fa-github"></i>
+          Sign in with Github
+        </a>
+      </div>
+
+      <div class="section col-sm-4 col-sm-offset-4">
+        <img src='_images/securocat.png' />
+      </div>
+    </div>
+  </body>
+</html>
