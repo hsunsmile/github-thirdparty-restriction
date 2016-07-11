@@ -56,10 +56,13 @@ class Dashboard < Sinatra::Base
       keys = github_user.api.keys
       github_user.attribs.to_h.merge(
         invalid_keys: keys.select do |key|
-          key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC")
+          key = key.with_indifferent_access
+          puts "current key: #{key.inspect}"
+          key && (key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC"))
         end.map(&:to_h),
         valid_keys: keys.select do |key|
-          key['created_at'] > Time.parse("2014-02-01 00:00:00 UTC")
+          key = key.with_indifferent_access
+          key && (key['created_at'] > Time.parse("2014-02-01 00:00:00 UTC"))
         end.map(&:to_h)
       )
     end
