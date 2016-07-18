@@ -55,16 +55,41 @@ class Dashboard < Sinatra::Base
     def user
       keys = github_user.api.keys
       github_user.attribs.to_h.merge(
-        invalid_keys: keys.select do |key|
+        invalid_keys: keys.map(&:to_h).select do |key|
           key = key.with_indifferent_access
-          puts "current key: #{key.inspect}"
-          key && (key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC"))
+          key && key['created_at'] && (key['created_at'] <= Time.parse("2014-02-01 00:00:00 UTC"))
         end.map(&:to_h),
-        valid_keys: keys.select do |key|
+        valid_keys: keys.map(&:to_h).select do |key|
           key = key.with_indifferent_access
-          key && (key['created_at'] > Time.parse("2014-02-01 00:00:00 UTC"))
+          key && key['created_at'] && (key['created_at'] > Time.parse("2014-02-01 00:00:00 UTC"))
         end.map(&:to_h)
       )
+    end
+
+    def diagnostic
+      begin
+        redis_client.set 'sasuke:diagnostic', true
+        {
+          status: 200,
+          success: true,
+          checks: [{
+            name: "redis",
+            resource: ENV["REDIS_URL"],
+            success: true
+          }]
+        }
+      rescue => e
+        {
+          status: 503,
+          success: false,
+          checks: [{
+            name: "redis",
+            resource: ENV["REDIS_URL"],
+            success: false,
+            message: e.message
+          }]
+        }
+      end
     end
   end
 
@@ -84,6 +109,18 @@ class Dashboard < Sinatra::Base
 
   get '/' do
     redirect '/index.html'
+  end
+
+  get '/z/ping' do
+    status diagnostic[:status]
+    body ''
+  end
+
+  get '/z/diagnostic' do
+    content_type :json
+    diag = diagnostic
+    status diag.delete :status
+    body diag.to_json
   end
 
   get '/progress/:type/:repository' do
