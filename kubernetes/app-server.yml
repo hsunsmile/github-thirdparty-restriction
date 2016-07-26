@@ -1,0 +1,32 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: github-tools-deployment
+  labels:
+    project: github-tools
+    role: app-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project: github-tools
+      role: app-server
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: github-tools-app-server
+      labels:
+        project: github-tools
+        role: app-server
+      annotations:
+        secret/GITHUB_VERIFIER_SECRET: ''
+        secret/GITHUB_CLIENT_SECRET: ''
+        secret/GITHUB_CLIENT_ID: ''
+    spec:
+      containers:
+      - name: github-tools-app-server
+        image: xsunsmile/github-thirdparty-restriction
+        ports:
+        - containerPort: 8080
