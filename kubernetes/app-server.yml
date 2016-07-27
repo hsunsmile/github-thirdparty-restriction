@@ -2,31 +2,59 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: github-tools-deployment
+  name: github-thirdparty-restriction-app-server
   labels:
-    project: github-tools
+    project: github-thirdparty-restriction
     role: app-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      project: github-tools
+      project: github-thirdparty-restriction
       role: app-server
   strategy:
     type: RollingUpdate
   template:
     metadata:
-      name: github-tools-app-server
+      name: github-thirdparty-restriction-app-server
       labels:
-        project: github-tools
+        project: github-thirdparty-restriction
         role: app-server
-      annotations:
-        secret/GITHUB_VERIFIER_SECRET: ''
-        secret/GITHUB_CLIENT_SECRET: ''
-        secret/GITHUB_CLIENT_ID: ''
+        annotations:
+          secret/GITHUB_VERIFIER_SECRET: ''
+          secret/GITHUB_CLIENT_SECRET: ''
+          secret/GITHUB_CLIENT_ID: ''
     spec:
       containers:
-      - name: github-tools-app-server
-        image: xsunsmile/github-thirdparty-restriction
+      - name: github-thirdparty-restriction
+        image: docker-registry.zende.sk/samson_non_prod/github-thirdparty-restriction:latest
+        resources:
+          limits:
+            cpu: 20m
+            memory: 512Mi
         ports:
-        - containerPort: 8080
+        - name: main-port
+          containerPort: 9393
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /z/ping
+            port: 9393
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-thirdparty-restriction
+  labels:
+    project: github-thirdparty-restriction
+    role: app-server
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: main-port
+  selector:
+    project: github-thirdparty-restriction
+    role: app-server
