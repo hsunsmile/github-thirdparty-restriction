@@ -47,15 +47,15 @@ WORKDIR $APP
 ADD src ${APP}/src
 ADD public ${APP}/public
 
-ADD .node-version $APP
-ADD package.json $APP
-ADD .babelrc $APP
-ADD webpack.config.babel.js $APP
+ADD .node-version $APP/
+ADD package.json $APP/
+ADD .babelrc $APP/
+ADD webpack.config.babel.js $APP/
 
-ADD .ruby-version $APP
-ADD Gemfile $APP
-ADD Gemfile.lock $APP
-ADD config.ru $APP
+ADD .ruby-version $APP/
+ADD Gemfile $APP/
+ADD Gemfile.lock $APP/
+ADD config.ru $APP/
 
 RUN rbenv install && \
     gem install bundler && \

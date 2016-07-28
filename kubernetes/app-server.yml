@@ -20,10 +20,10 @@ spec:
       labels:
         project: github-thirdparty-restriction
         role: app-server
-        annotations:
-          secret/GITHUB_VERIFIER_SECRET: ''
-          secret/GITHUB_CLIENT_SECRET: ''
-          secret/GITHUB_CLIENT_ID: ''
+        # annotations:
+        #   secret/GITHUB_VERIFIER_SECRET: ''
+        #   secret/GITHUB_CLIENT_SECRET: ''
+        #   secret/GITHUB_CLIENT_ID: ''
     spec:
       containers:
       - name: github-thirdparty-restriction
