@@ -2,32 +2,36 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: github-thirdparty-restriction-app-server
+  name: github-tools-app-server
   labels:
-    project: github-thirdparty-restriction
+    project: github-tools
     role: app-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      project: github-thirdparty-restriction
+      project: github-tools
       role: app-server
   strategy:
     type: RollingUpdate
   template:
     metadata:
-      name: github-thirdparty-restriction-app-server
+      name: github-tools-app-server
       labels:
-        project: github-thirdparty-restriction
+        project: github-tools
         role: app-server
-        # annotations:
-        #   secret/GITHUB_VERIFIER_SECRET: ''
-        #   secret/GITHUB_CLIENT_SECRET: ''
-        #   secret/GITHUB_CLIENT_ID: ''
+      annotations:
+        secret/WARDEN_GITHUB_VERIFIER_SECRET: 'verifier_secret'
+        secret/GITHUB_CLIENT_SECRET: 'client_secret'
+        secret/GITHUB_CLIENT_ID: 'client_id'
     spec:
       containers:
-      - name: github-thirdparty-restriction
+      - name: github-tools
         image: docker-registry.zende.sk/samson_non_prod/github-thirdparty-restriction:latest
+        command:
+          - "npm"
+          - "run"
+          - "web-server"
         resources:
           limits:
             cpu: 20m
@@ -46,9 +50,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: github-thirdparty-restriction
+  name: github-tools
   labels:
-    project: github-thirdparty-restriction
+    project: github-tools
     role: app-server
 spec:
   type: NodePort
@@ -56,5 +60,5 @@ spec:
   - port: 80
     targetPort: main-port
   selector:
-    project: github-thirdparty-restriction
+    project: github-tools
     role: app-server

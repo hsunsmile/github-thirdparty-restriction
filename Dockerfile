@@ -26,6 +26,7 @@ RUN apt-get install -y --no-install-recommends \
     libxslt1-dev \
     libyaml-dev \
     python \
+    redis-server \
     python-software-properties \
     sqlite3 \
     zlib1g-dev

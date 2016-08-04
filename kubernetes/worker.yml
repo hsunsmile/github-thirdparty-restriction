@@ -1,0 +1,38 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: github-tools-worker
+  labels:
+    project: github-tools
+    role: worker 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project: github-tools
+      role: worker
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: github-tools-worker
+      labels:
+        project: github-tools
+        role: worker
+      annotations:
+        secret/WARDEN_GITHUB_VERIFIER_SECRET: 'verifier_secret'
+        secret/GITHUB_CLIENT_SECRET: 'client_secret'
+        secret/GITHUB_CLIENT_ID: 'client_id'
+    spec:
+      containers:
+      - name: github-tools
+        image: docker-registry.zende.sk/samson_non_prod/github-thirdparty-restriction:latest
+        command:
+          - "npm"
+          - "run"
+          - "worker"
+        resources:
+          limits:
+            cpu: 20m
+            memory: 512Mi
