@@ -69,6 +69,9 @@ class Dashboard < Sinatra::Base
     def diagnostic
       begin
         redis_client.set 'sasuke:diagnostic', true
+        %w[WARDEN_GITHUB_VERIFIER_SECRET GITHUB_CLIENT_SECRET GITHUB_CLIENT_ID].each do |env|
+          raise "#{env} is not ready yet" unless read_secrect(env)
+        end
         {
           status: 200,
           success: true,
@@ -95,13 +98,16 @@ class Dashboard < Sinatra::Base
 
   before do
     p = request.path_info.split('/')[1]
-    pass if p =~ /auth.*/
+    pass if p =~ /auth.*|z.*/
     unless authenticated?
       redirect '/401.html'
     end
   end
 
   get '/authenticate' do
+    %w[WARDEN_GITHUB_VERIFIER_SECRET GITHUB_CLIENT_SECRET GITHUB_CLIENT_ID].each do |env|
+      ENV[env] ||= read_secrect(env)
+    end
     authenticate!
     redis_client.set 'github_client:access_token', github_user.api.access_token
     redirect '/index.html'

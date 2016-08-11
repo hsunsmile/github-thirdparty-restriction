@@ -27,6 +27,8 @@ RUN apt-get install -y --no-install-recommends \
     libyaml-dev \
     python \
     redis-server \
+    vim \
+    iputils-ping \
     python-software-properties \
     sqlite3 \
     zlib1g-dev

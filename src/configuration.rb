@@ -2,13 +2,17 @@ require 'octokit'
 require 'redis'
 
 Encoding.default_external = "utf-8"
-redis_host = ENV.fetch('REDIS_SERVICE_HOST', 'localhost')
-redis_port = ENV.fetch('REDIS_SERVICE_PORT', 6379)
+redis_host = ENV.fetch('GITHUB_TOOLS_REDIS_SERVICE_HOST', 'localhost')
+redis_port = ENV.fetch('GITHUB_TOOLS_REDIS_SERVICE_PORT', 6379)
 
 ENV['REDIS_URL'] ||= "redis://#{redis_host}:#{redis_port}/"
 
 Octokit.configure do |c|
   c.auto_paginate = true
+end
+
+def read_secrect(name)
+  ENV[name] || File.read("/secrets/#{name}")
 end
 
 def logger
