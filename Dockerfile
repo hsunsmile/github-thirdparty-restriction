@@ -59,6 +59,7 @@ ADD .ruby-version $APP/
 ADD Gemfile $APP/
 ADD Gemfile.lock $APP/
 ADD config.ru $APP/
+ADD debug-docker.sh $APP/
 
 RUN rbenv install && \
     gem install bundler && \
@@ -68,3 +69,4 @@ RUN rbenv install && \
 RUN bundle
 RUN npm install
 RUN npm run compile
+CMD /bin/sh debug-docker.sh

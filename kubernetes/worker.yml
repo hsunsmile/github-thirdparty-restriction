@@ -29,9 +29,8 @@ spec:
       - name: github-tools
         image: docker-registry.zende.sk/samson_non_prod/github-thirdparty-restriction:latest
         command:
-          - "npm"
-          - "run"
-          - "worker"
+          - "sh"
+          - "debug-docker.sh"
         resources:
           limits:
             cpu: 20m
