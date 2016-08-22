@@ -11,7 +11,7 @@
     "servers": "npm run db-server & npm run web-server",
     "web-server": "bundle exec thin start -p 9393",
     "db-server": "redis-server",
-    "worker": "bundle exec sidekiq -r ./src/workers/github/command.rb",
+    "worker": "bundle exec sidekiq -r ./src/workers/github/command.rb -c 1",
     "compile": "webpack -p --config webpack.config.babel.js",
     "webpack": "webpack --watch --config webpack.config.babel.js"
   },
